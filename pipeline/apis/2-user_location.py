@@ -1,36 +1,41 @@
 #!/usr/bin/env python3
 """
-Prints the location of a GitHub user specified
-as an argument to the script.
+    script that prints the location of a specific user:
 """
 
-import sys
+
 import requests
-import json
+import time
+from datetime import datetime
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Usage: ./2-user_location.py <github_username>")
-        sys.exit(1)
 
-    username = sys.argv[1]
-    url = f'https://api.github.com/users/{username}'
+def main(url):
+    """
+    - The user is passed as first argument of the script
+    with the full API URL, example: ./2-user_location.py
+    https://api.github.com/users/holbertonschool
+    - If the user doesn’t exist, print Not found
+    - If the status code is 403, print Reset in X min where X
+    is the number of minutes from now and the value of
+    X-Ratelimit-Reset
+    - Your code should not be executed when the file is
+    imported (you should use if __name__ == '__main__':)
 
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raises an error for HTTP codes 4xx or 5xx
+    """
+    response = requests.get(url)
 
-        data = response.json()
-        location = data.get('location', 'Location not available')
-        print(location)
+    if response.status_code == 404:
+        print("Not found")
+    elif response.status_code == 403:
+        reset_timestamp = int(response.headers["X-Ratelimit-Reset"])
+        current_timestamp = int(time.time())
+        reset_in_minutes = (reset_timestamp - current_timestamp) // 60
+        print("Reset in {} min".format(reset_in_minutes))
+    else:
+        print(response.json()["location"])
 
-    except requests.exceptions.HTTPError as http_err:
-        if response.status_code == 403:
-            print("Rate limit exceeded. Please try again later.")
-        elif response.status_code == 404:
-            print("User not found.")
-        else:
-            print(f"HTTP error occurred: {http_err}")
-    except requests.exceptions.RequestException as req_err:
-        print(f"Request error occurred: {req_err}")
 
+if __name__ == "__main__":
+    import sys
+
+    main(sys.argv[1])
