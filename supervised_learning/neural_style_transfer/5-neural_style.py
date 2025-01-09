@@ -241,11 +241,9 @@ class NST:
         if not isinstance(style_outputs, list) or len(style_outputs) != length:
             raise TypeError(
                 "style_outputs must be a list with a length of {}".format(
-                    length
-                )
-            )
+                    length) )
 
-        weight = 1 / length
+        weight = 1.0 / length
         style_cost = 0.0
 
         for i in range(length):
@@ -253,4 +251,4 @@ class NST:
                 style_outputs[i], self.gram_style_features[i]
             )
 
-        return style_cost                
+        return style_cost             
